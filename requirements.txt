@@ -2,3 +2,4 @@ flask
 PyJWT
 python-dotenv
 jsonify
+flask-bcrypt
