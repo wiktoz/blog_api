@@ -4,8 +4,11 @@ WORKDIR /blog_api
 
 COPY . /blog_api
 
+RUN apt-get update && apt-get install build-essential libffi-dev -y
+
 RUN pip install -r requirements.txt
+RUN chmod +x /blog_api/start.sh
 
 EXPOSE 5000
 
-CMD ["flask", "run", "--host=0.0.0.0"]
+ENTRYPOINT ["/blog_api/start.sh"]
