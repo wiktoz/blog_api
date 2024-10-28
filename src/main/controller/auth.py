@@ -1,7 +1,7 @@
 from flask import request, Response, jsonify, Blueprint
 from src.main.db.models import User
 from src.main.extensions import db, jwt
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity, set_access_cookies, set_refresh_cookies
 
 auth_bp = Blueprint("auth_bp", __name__, url_prefix="/api/auth")
 
@@ -40,14 +40,16 @@ def login():
     data = request.get_json()
     username, password = data["username"], data["password"]
     if not username:
-        return jsonify('{"message":"Provide username"}'), 200
+        return jsonify({"login":False,"message":"Provide username"}), 200
     user = db.session.query(User).filter_by(username=username).first()
     if user.verify_password(password):
         token = create_access_token(identity=username)
-        out = jsonify({"token":token})
-        out.set_cookie("token",token,httponly=True)
+        refresh_token = create_refresh_token(identity=username)
+        out = jsonify({'login': True})
+        set_access_cookies(out,token)
+        set_refresh_cookies(out,refresh_token)
         return out, 200
-    return jsonify('{"message":"Invalid credentials"}'), 200
+    return jsonify({"login":False,"message":"Invalid credentials"}), 200
 
 """
 TODO: Test endpoint, to be removed
