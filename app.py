@@ -17,6 +17,7 @@ def create_app():
     app.config['JWT_ALGORITHM'] = 'ES256'
     app.config['JWT_PUBLIC_KEY'] = open('ec-pub.key','r').read()
     app.config['JWT_PRIVATE_KEY'] = open('ec.key','r').read()
+    app.config['JWT_TOKEN_LOCATION'] = ["headers", "cookies"]
 
     app.register_blueprint(auth_bp)
 
