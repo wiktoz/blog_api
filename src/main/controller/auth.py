@@ -2,8 +2,11 @@ from flask import request, Response, jsonify, Blueprint
 from src.main.db.models import User
 from src.main.extensions import db, jwt
 from src.main.utils.password_validator import is_valid_length, is_on_blacklist, contains_pii
-from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity, set_access_cookies, set_refresh_cookies
-
+from flask_jwt_extended import (
+    create_access_token, create_refresh_token, jwt_required, 
+    get_jwt_identity, set_access_cookies, set_refresh_cookies, 
+    unset_jwt_cookies, 
+)
 auth_bp = Blueprint("auth_bp", __name__, url_prefix="/api/auth")
 
 
@@ -56,6 +59,23 @@ def login():
         set_refresh_cookies(out,refresh_token)
         return out, 200
     return jsonify({"login":False,"message":"Invalid credentials"}), 200
+
+@auth_bp.route("/token/revoke", methods=["POST"])
+@jwt_required()
+def revoke_token():
+    out = jsonify({"refresh":True})
+    unset_jwt_cookies(out)
+    return jsonify({"logout":True}), 200
+
+
+@auth_bp.route("/token/refresh", methods=["POST"])
+@jwt_required(refresh=True)
+def refresh_token():
+    out = jsonify({"refresh":True})
+    current_user = get_jwt_identity()
+    atoken = create_access_token(identity=current_user)
+    set_access_cookies(out, atoken)
+    return jsonify({"refresh":True}), 200
 
 
 
