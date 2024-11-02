@@ -12,7 +12,7 @@ def register_extensions(app):
 def create_app():
     app = Flask(__name__)
 
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///uaim.db'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@blog_db:5432/blog'
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 60
     app.config['JWT_ALGORITHM'] = 'ES256'
     app.config['JWT_PUBLIC_KEY'] = open('ec-pub.key','r').read()
