@@ -10,6 +10,7 @@ user_group = db.Table(
 )
 
 class User(db.Model):
+    
     __tablename__ = 'users'
     user_id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -35,6 +36,19 @@ class User(db.Model):
         except EmailNotValidError:
             return False
 
+    def to_dict(self):
+        return {
+            'user_id': self.user_id,
+            'email': self.email,
+            'name': self.name,
+            'surname': self.surname,
+            'groups': [group.name for group in self.groups],
+            'posts': [post.post_id for post in self.posts],
+            'comments': [comment.comment_id for comment in self.comments],
+            'ratings': [rating.rating_id for rating in self.ratings],
+            'notifications': [notification.notification_id for notification in self.notifications]
+        }
+
 class Group(db.Model):
     __tablename__ = 'groups'
     group_id = db.Column(db.Integer, primary_key=True)
@@ -43,8 +57,14 @@ class Group(db.Model):
     users = db.relationship('User', secondary=user_group, back_populates='groups')
     posts = db.relationship('Post', backref='group', lazy=True)
 
-    def __repr__(self):
-        return f"Group('{self.name}')"
+    def to_dict(self):
+        return {
+            'group_id': self.group_id,
+            'name': self.name,
+            'description': self.description,
+            'users': [user.user_id for user in self.users],
+            'posts': [post.post_id for post in self.posts]
+        }
 
 class Post(db.Model):
     __tablename__ = 'posts'
@@ -60,8 +80,20 @@ class Post(db.Model):
     ratings = db.relationship('Rating', backref='post', lazy=True)
     notifications = db.relationship('Notification', backref='post', lazy=True)
 
-    def __repr__(self):
-        return f"Post('{self.title}', '{self.created_at}')"
+    def to_dict(self):
+        return {
+            'post_id': self.post_id,
+            'group_id': self.group_id,
+            'user_id': self.user_id,
+            'title': self.title,
+            'content': self.content,
+            'created_at': self.created_at,
+            'updated_at': self.updated_at,
+            'photos': [photo.photo_id for photo in self.photos],
+            'comments': [comment.comment_id for comment in self.comments],
+            'ratings': [rating.rating_id for rating in self.ratings],
+            'notifications': [notification.notification_id for notification in self.notifications]
+        }
 
 class Photo(db.Model):
     __tablename__ = 'photos'
@@ -70,8 +102,13 @@ class Photo(db.Model):
     base64 = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    def __repr__(self):
-        return f"Photo('{self.photo_id}', '{self.created_at}')"
+    def to_dict(self):
+        return {
+            'photo_id': self.photo_id,
+            'post_id': self.post_id,
+            'base64': self.base64,
+            'created_at': self.created_at
+        }
 
 class Comment(db.Model):
     __tablename__ = 'comments'
@@ -81,8 +118,14 @@ class Comment(db.Model):
     content = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    def __repr__(self):
-        return f"Comment('{self.content}', '{self.created_at}')"
+    def to_dict(self):
+        return {
+            'comment_id': self.comment_id,
+            'post_id': self.post_id,
+            'user_id': self.user_id,
+            'content': self.content,
+            'created_at': self.created_at
+        }
 
 class Rating(db.Model):
     __tablename__ = 'ratings'
@@ -92,8 +135,14 @@ class Rating(db.Model):
     rating = db.Column(db.Integer, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    def __repr__(self):
-        return f"Rating('{self.rating}', '{self.created_at}')"
+    def to_dict(self):
+        return {
+            'rating_id': self.rating_id,
+            'post_id': self.post_id,
+            'user_id': self.user_id,
+            'rating': self.rating,
+            'created_at': self.created_at
+        }
 
 class Notification(db.Model):
     __tablename__ = 'notifications'
@@ -104,5 +153,12 @@ class Notification(db.Model):
     viewed = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    def __repr__(self):
-        return f"Notification('{self.content}', '{self.created_at}')"
+    def to_dict(self):
+        return {
+            'notification_id': self.notification_id,
+            'user_id': self.user_id,
+            'post_id': self.post_id,
+            'content': self.content,
+            'viewed': self.viewed,
+            'created_at': self.created_at
+        }

@@ -11,14 +11,8 @@ from flask_jwt_extended import (
 user_bp = Blueprint('user_bp', __name__, url_prefix='/api/users')
 
 @user_bp.route('/', methods=['GET'])
+# @jwt_required()
 def get_all_users():
     users = User.query.all()
-    users_list = [
-        {
-            "user_id": user.user_id,
-            "name": user.name,
-            "surname": user.surname,
-            "email": user.email
-        } for user in users
-    ]
+    users_list = [user.to_dict() for user in users]
     return jsonify(users_list), 200
