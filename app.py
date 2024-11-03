@@ -28,6 +28,12 @@ def create_app():
     # Rejestracja rozszerzeń
     register_extensions(app)
 
+    # Tworzenie tabel i inicjalizacja bazy danymi
+    with app.app_context():
+        db.create_all()  # Tworzenie tabel w bazie danych
+        DatabaseInitializer.clear_db()
+        DatabaseInitializer.init_db()  # Inicjalizacja bazy danymi
+
     return app
 
 if __name__ == '__main__':
