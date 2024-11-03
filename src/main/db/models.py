@@ -3,7 +3,6 @@ from datetime import datetime
 from email_validator import validate_email, EmailNotValidError
 
 
-# Definicja tabeli pomocniczej user_group - musi być przed klasami User i Group
 user_group = db.Table(
     'user_group',
     db.Column('user_id', db.Integer, db.ForeignKey('users.user_id'), primary_key=True),
