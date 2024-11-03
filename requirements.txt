@@ -2,4 +2,9 @@ flask
 PyJWT
 python-dotenv
 jsonify
-flask-bcrypt
+Flask-Argon2
+flask-jwt-extended
+flask-jwt-extended[asymmetric_crypto]
+Flask-SQLAlchemy
+psycopg2-binary
+email-validator
