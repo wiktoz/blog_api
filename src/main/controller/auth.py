@@ -21,14 +21,14 @@ def register():
     email = data['email']
     associated_data = [name,surname,email]
     if not email:
-        return jsonify('{"message":"Provide email"}'), 200
+        return jsonify({"message":"Provide email"}), 200
     if not name:
-        return jsonify('{"message":"Provide your name"}'), 200
+        return jsonify({"message":"Provide your name"}), 200
     if not surname:
-        return jsonify('{"message":"Provide your surname"}'), 200
+        return jsonify({"message":"Provide your surname"}), 200
 
     if db.session.query(User).filter_by(email=email).first() != None:
-        return jsonify('{"message":"User with provided email already exist"}'), 200
+        return jsonify({"message":"User with provided email already exist"}), 200
     
     if not is_valid_length(password):
         return jsonify({"message":"Insecure password. Password's length must be in range <8,64>"}), 200
@@ -45,15 +45,15 @@ def register():
         surname=surname
     )
     if not user.validate_email():
-        return jsonify('{"message":"Invalid email"}'), 200
+        return jsonify({"message":"Invalid email"}), 200
     
     user.set_password(password)
     db.session.add(user)
     try:
         db.session.commit()
     except:
-        return jsonify('{"message":"User with provided email already exist"}'), 200
-    return jsonify('{"message":"Account created"}'), 200
+        return jsonify({"message":"User with provided email already exist"}), 200
+    return jsonify({"message":"Account created"}), 200
     
 @auth_bp.route("/login", methods=["POST"])
 def login():
@@ -89,21 +89,3 @@ def refresh_token():
     atoken = create_access_token(identity=current_user)
     set_access_cookies(out, atoken)
     return jsonify({"refresh":True}), 200
-
-
-
-"""
-TODO: Test endpoint, to be removed
-"""
-@auth_bp.route("/secure", methods=["GET"])
-@jwt_required()
-def secure():
-    subjectUUID = get_jwt_identity()
-    return jsonify(logged_in_as=subjectUUID), 200
-
-@auth_bp.route("/secure2", methods=["POST"])
-@jwt_required()
-def secure2():
-    data = request.get_json()
-    test = data["test"]
-    return jsonify(test), 200
