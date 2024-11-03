@@ -1,9 +1,7 @@
 from src.main.extensions import db, argon2
-from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 from email_validator import validate_email, EmailNotValidError
 
-Base = declarative_base()
 
 user_group = db.Table(
     'user_group',
