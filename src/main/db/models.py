@@ -1,9 +1,7 @@
 from src.main.extensions import db, argon2
-from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 from email_validator import validate_email, EmailNotValidError
 
-Base = declarative_base()
 
 # Definicja tabeli pomocniczej user_group - musi być przed klasami User i Group
 user_group = db.Table(
