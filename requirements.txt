@@ -7,3 +7,4 @@ flask-jwt-extended
 flask-jwt-extended[asymmetric_crypto]
 Flask-SQLAlchemy
 psycopg2-binary
+email-validator

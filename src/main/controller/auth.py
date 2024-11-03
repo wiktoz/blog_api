@@ -7,6 +7,7 @@ from flask_jwt_extended import (
     get_jwt_identity, set_access_cookies, set_refresh_cookies, 
     unset_jwt_cookies, 
 )
+
 auth_bp = Blueprint("auth_bp", __name__, url_prefix="/api/auth")
 
 
@@ -21,19 +22,31 @@ def register():
     associated_data = [name,surname,email]
     if not email:
         return jsonify('{"message":"Provide email"}'), 200
+    if not name:
+        return jsonify('{"message":"Provide your name"}'), 200
+    if not surname:
+        return jsonify('{"message":"Provide your surname"}'), 200
+
+    if db.session.query(User).filter_by(email=email).first() != None:
+        return jsonify('{"message":"User with provided email already exist"}'), 200
+    
     if not is_valid_length(password):
         return jsonify({"message":"Insecure password. Password's length must be in range <8,64>"}), 200
+    
     if contains_pii(password, associated_data):
         return jsonify({"message":"Insecure password. Password can't consist of personal information"}), 200
+    
     if is_on_blacklist(password):
         return jsonify({"message":"Insecure password. Provided password is compromised"}), 200
+    
     user = User(
         email=email,
         name=name,
         surname=surname
     )
-    if db.session.query(User).filter_by(email=email).first() != None:
-        return jsonify('{"message":"User with provided email already exist"}'), 200
+    if not user.validate_email():
+        return jsonify('{"message":"Invalid email"}'), 200
+    
     user.set_password(password)
     db.session.add(user)
     try:
