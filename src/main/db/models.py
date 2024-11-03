@@ -1,11 +1,13 @@
 from src.main.extensions import db, argon2
+from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 from email_validator import validate_email, EmailNotValidError
-from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
-user_group = db.Table('user_group', Base.metadata,
+# Definicja tabeli pomocniczej user_group - musi być przed klasami User i Group
+user_group = db.Table(
+    'user_group',
     db.Column('user_id', db.Integer, db.ForeignKey('users.user_id'), primary_key=True),
     db.Column('group_id', db.Integer, db.ForeignKey('groups.group_id'), primary_key=True)
 )
@@ -25,7 +27,7 @@ class User(db.Model):
 
     def set_password(self, password):
         self.password_hash = argon2.generate_password_hash(password)
-    
+
     def verify_password(self, password):
         return argon2.check_password_hash(self.password_hash, password)
 
@@ -64,7 +66,6 @@ class Post(db.Model):
     def __repr__(self):
         return f"Post('{self.title}', '{self.created_at}')"
 
-
 class Photo(db.Model):
     __tablename__ = 'photos'
     photo_id = db.Column(db.Integer, primary_key=True)
@@ -73,8 +74,7 @@ class Photo(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
-        return f"Photo('{self.url}', '{self.created_at}')"
-
+        return f"Photo('{self.photo_id}', '{self.created_at}')"
 
 class Comment(db.Model):
     __tablename__ = 'comments'
