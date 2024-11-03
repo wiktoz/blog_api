@@ -2,6 +2,7 @@ from flask import Flask, jsonify
 from src.main.extensions import db, jwt, argon2
 from src.main.db.models import User
 from src.main.controller.auth import auth_bp
+from src.main.controller.UserController import user_bp
 from src.main.db.DatabaseInitializer import DatabaseInitializer  # Importujemy klasę DatabaseInitializer
 
 def register_extensions(app):
@@ -24,6 +25,7 @@ def create_app():
 
     # Rejestracja blueprintów
     app.register_blueprint(auth_bp)
+    app.register_blueprint(user_bp)
 
     # Rejestracja rozszerzeń
     register_extensions(app)
