@@ -1,11 +1,11 @@
 from flask import request, Response, jsonify, Blueprint
 from src.main.db.models import User
-from src.main.extensions import db, jwt
+from src.main.extensions import db, jwt, jwt_redis_blocklist, ACCESS_EXPIRES
 from src.main.utils.password_validator import is_valid_length, is_on_blacklist, contains_pii
 from flask_jwt_extended import (
     create_access_token, create_refresh_token, jwt_required, 
     get_jwt_identity, set_access_cookies, set_refresh_cookies, 
-    unset_jwt_cookies, 
+    unset_jwt_cookies, get_jwt
 )
 
 auth_bp = Blueprint("auth_bp", __name__, url_prefix="/api/auth")
@@ -73,12 +73,30 @@ def login():
         return out, 200
     return jsonify({"login":False,"message":"Invalid credentials"}), 200
 
-@auth_bp.route("/token/revoke", methods=["POST"])
+@jwt.token_in_blocklist_loader
+def is_revoked(jwt_header, jwt_payload: dict):
+    jti = jwt_payload["jti"]
+    token_in_redis = jwt_redis_blocklist.get(jti)
+    return token_in_redis is not None
+
+
+@auth_bp.route("/token/revoke/atoken", methods=["POST"])
 @jwt_required()
-def revoke_token():
-    out = jsonify({"refresh":True})
-    unset_jwt_cookies(out)
-    return jsonify({"logout":True}), 200
+def revoke_access_token():
+    token = get_jwt()
+    jti = token["jti"]
+    jwt_redis_blocklist.set(jti, "", ex=ACCESS_EXPIRES)
+    out = jsonify({"logout":True})
+    return out, 200
+
+@auth_bp.route("/token/revoke/rtoken", methods=["POST"])
+@jwt_required(refresh=True)
+def revoke_refresh_token():
+    token = get_jwt()
+    jti = token["jti"]
+    jwt_redis_blocklist.set(jti, "", ex=ACCESS_EXPIRES)
+    out = jsonify({"logout":True})
+    return out, 200
 
 
 @auth_bp.route("/token/refresh", methods=["POST"])

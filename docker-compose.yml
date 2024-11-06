@@ -8,7 +8,13 @@ services:
         depends_on:
             blog_db:
                 condition: service_healthy
-                
+
+    blog_redis:
+        container_name: redis
+        image: "redis:alpine"
+        ports:
+            - "6379:6379"
+
     blog_db:
         container_name: database
         image: postgres:17
