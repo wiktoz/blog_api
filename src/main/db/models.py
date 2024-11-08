@@ -1,18 +1,20 @@
 from src.main.extensions import db, argon2
 from datetime import datetime
 from email_validator import validate_email, EmailNotValidError
+from uuid import uuid4
+from sqlalchemy.dialects.postgresql import UUID
 
 
 user_group = db.Table(
     'user_group',
-    db.Column('user_id', db.Integer, db.ForeignKey('users.user_id'), primary_key=True),
+    db.Column('user_id', UUID(as_uuid=True), db.ForeignKey('users.user_id'), primary_key=True),
     db.Column('group_id', db.Integer, db.ForeignKey('groups.group_id'), primary_key=True)
 )
 
 class User(db.Model):
     
     __tablename__ = 'users'
-    user_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
     email = db.Column(db.String(120), unique=True, nullable=False)
     name = db.Column(db.String(32), nullable=False)
     surname = db.Column(db.String(32))
@@ -70,7 +72,7 @@ class Post(db.Model):
     __tablename__ = 'posts'
     post_id = db.Column(db.Integer, primary_key=True)
     group_id = db.Column(db.Integer, db.ForeignKey('groups.group_id'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
+    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.user_id'), nullable=False)
     title = db.Column(db.String(120), nullable=False)
     content = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -114,7 +116,7 @@ class Comment(db.Model):
     __tablename__ = 'comments'
     comment_id = db.Column(db.Integer, primary_key=True)
     post_id = db.Column(db.Integer, db.ForeignKey('posts.post_id'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
+    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.user_id'), nullable=False)
     content = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -131,7 +133,7 @@ class Rating(db.Model):
     __tablename__ = 'ratings'
     rating_id = db.Column(db.Integer, primary_key=True)
     post_id = db.Column(db.Integer, db.ForeignKey('posts.post_id'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
+    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.user_id'), nullable=False)
     rating = db.Column(db.Integer, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -147,7 +149,7 @@ class Rating(db.Model):
 class Notification(db.Model):
     __tablename__ = 'notifications'
     notification_id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
+    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.user_id'), nullable=False)
     post_id = db.Column(db.Integer, db.ForeignKey('posts.post_id'), nullable=False)
     content = db.Column(db.Text, nullable=False)
     viewed = db.Column(db.Boolean, default=False)

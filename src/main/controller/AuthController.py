@@ -65,7 +65,7 @@ def login():
     if user == None:
         return jsonify({"login":False,"message":"User doesn't exist"}), 200
     if user.verify_password(password):
-        token = create_access_token(identity=email)
+        token = create_access_token(identity=user.user_id)
         refresh_token = create_refresh_token(identity=email)
         out = jsonify({'login': True})
         set_access_cookies(out,token)
