@@ -5,6 +5,7 @@ from src.main.controller.AuthController import auth_bp
 from src.main.controller.UserController import user_bp
 from src.main.controller.GroupController import group_bp
 from src.main.db.DatabaseInitializer import DatabaseInitializer
+from flask_cors import CORS
 
 def register_extensions(app):
     db.init_app(app)
@@ -13,6 +14,7 @@ def register_extensions(app):
 
 def create_app():
     app = Flask(__name__)
+    CORS(app, resources={r"/*": {"origins": "*"}})
 
     
     app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@blog_db:5432/blog'
