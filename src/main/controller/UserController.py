@@ -16,3 +16,19 @@ def get_all_users():
     users = User.query.all()
     users_list = [user.to_dict() for user in users]
     return jsonify(users_list), 200
+
+
+@user_bp.route('/me', methods=["GET"])
+@jwt_required()
+def get_me():
+    identity = get_jwt_identity()
+    user = User.query.filter_by(user_id=identity).first().to_dict()
+    return jsonify(user), 200
+
+@user_bp.route("/<user_uuid>", methods=["GET"])
+#@jwt_required()
+def get_user(user_uuid):
+    user = User.query.filter_by(user_id=user_uuid).first()
+    if user != None:
+        return jsonify(user.to_dict()), 200
+    return jsonify({"message":"No such user"}), 404
