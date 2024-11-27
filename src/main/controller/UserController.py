@@ -32,3 +32,15 @@ def get_user(user_uuid):
     if user != None:
         return jsonify(user.to_dict()), 200
     return jsonify({"message":"No such user"}), 404
+
+@user_bp.route('/me', methods=["PUT"])
+@jwt_required()
+def put_user():
+    data = request.get_json()
+    identity = get_jwt_identity()
+    name = data["name"]
+    surname = data["surname"]
+    user = User.query.filter_by(user_id=identity).first()
+    user.set_name(name)
+    user.set_surname(surname)
+    return jsonify(user.to_dict()), 200
