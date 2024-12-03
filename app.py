@@ -5,6 +5,7 @@ from src.main.controller.AuthController import auth_bp
 from src.main.controller.UserController import user_bp
 from src.main.controller.GroupController import group_bp
 from src.main.controller.PostController import post_bp
+from src.main.controller.NotificationController import notification_bp 
 from src.main.db.DatabaseInitializer import DatabaseInitializer
 from flask_cors import CORS
 
@@ -33,6 +34,7 @@ def create_app():
     app.register_blueprint(user_bp)
     app.register_blueprint(group_bp)
     app.register_blueprint(post_bp)
+    app.register_blueprint(notification_bp)
     register_extensions(app)
 
    
