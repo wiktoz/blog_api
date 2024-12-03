@@ -11,8 +11,36 @@ from flask_jwt_extended import (
 user_bp = Blueprint('user_bp', __name__, url_prefix='/api/users')
 
 @user_bp.route('/', methods=['GET'])
-# @jwt_required()
+@jwt_required()
 def get_all_users():
     users = User.query.all()
     users_list = [user.to_dict() for user in users]
     return jsonify(users_list), 200
+
+
+@user_bp.route('/me', methods=["GET"])
+@jwt_required()
+def get_me():
+    identity = get_jwt_identity()
+    user = User.query.filter_by(user_id=identity).first().to_dict()
+    return jsonify(user), 200
+
+@user_bp.route("/<user_uuid>", methods=["GET"])
+@jwt_required()
+def get_user(user_uuid):
+    user = User.query.filter_by(user_id=user_uuid).first()
+    if user != None:
+        return jsonify(user.to_dict()), 200
+    return jsonify({"message":"No such user"}), 404
+
+@user_bp.route('/me', methods=["PUT"])
+@jwt_required()
+def put_user():
+    data = request.get_json()
+    identity = get_jwt_identity()
+    name = data["name"]
+    surname = data["surname"]
+    user = User.query.filter_by(user_id=identity).first()
+    user.set_name(name)
+    user.set_surname(surname)
+    return jsonify(user.to_dict()), 200

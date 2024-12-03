@@ -13,7 +13,7 @@ group_bp = Blueprint("group_bp", __name__, url_prefix="/api/groups")
 
 
 @group_bp.route("/", methods=["GET"])
-# @jwt_required()
+@jwt_required()
 def get_all_groups():
     groups = Group.query.all()
     groups_list = [group.to_dict() for group in groups]

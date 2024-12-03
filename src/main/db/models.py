@@ -28,6 +28,13 @@ class User(db.Model):
     def set_password(self, password):
         self.password_hash = argon2.generate_password_hash(password)
 
+    def set_name(self, name):
+        self.name = name
+
+    def set_surname(self, surname):
+        self.surname = surname
+
+
     def verify_password(self, password):
         return argon2.check_password_hash(self.password_hash, password)
 
