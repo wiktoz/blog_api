@@ -1,5 +1,3 @@
-
-
 from flask import jsonify, Blueprint
 from src.main.db.models import Post
 from flask_jwt_extended import jwt_required, get_jwt_identity

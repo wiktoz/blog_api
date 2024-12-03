@@ -11,7 +11,7 @@ from flask_jwt_extended import (
 user_bp = Blueprint('user_bp', __name__, url_prefix='/api/users')
 
 @user_bp.route('/', methods=['GET'])
-# @jwt_required()
+@jwt_required()
 def get_all_users():
     users = User.query.all()
     users_list = [user.to_dict() for user in users]
@@ -26,7 +26,7 @@ def get_me():
     return jsonify(user), 200
 
 @user_bp.route("/<user_uuid>", methods=["GET"])
-#@jwt_required()
+@jwt_required()
 def get_user(user_uuid):
     user = User.query.filter_by(user_id=user_uuid).first()
     if user != None:
