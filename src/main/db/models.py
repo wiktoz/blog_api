@@ -71,7 +71,7 @@ class Group(db.Model):
             'group_id': self.group_id,
             'name': self.name,
             'description': self.description,
-            'users': [user.user_id for user in self.users],
+            #'users': [f"{user.name} {user.surname}" for user in self.users],
             'posts': [post.post_id for post in self.posts]
         }
 
@@ -93,7 +93,7 @@ class Post(db.Model):
         return {
             'post_id': self.post_id,
             'group_id': self.group_id,
-            'user_id': self.user_id,
+            'user': f"{self.user.name} {self.user.surname}",
             'title': self.title,
             'content': self.content,
             'created_at': self.created_at,
@@ -152,6 +152,7 @@ class Rating(db.Model):
             'rating': self.rating,
             'created_at': self.created_at
         }
+    
 
 class Notification(db.Model):
     __tablename__ = 'notifications'
