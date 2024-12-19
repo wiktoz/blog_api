@@ -80,23 +80,21 @@ def add_post(group_id):
     users = group.users
     for user in users:
         if user.user_id != user_id:
-            notification = Notification(user_id=user.user_id, message=f"New post in group {group.name}!")
+            notification = Notification(user_id=user.user_id, content=f"New post in group {group.name}")
             db.session.add(notification)
-            db.session.commit()
     
     return jsonify({"message":"Post added"}), 200
 
-@group_bp.route('/<group_id>/<phrase>', methods=['GET'])
+@group_bp.route('/search/<phrase>', methods=['GET'])
 @jwt_required()
-def search_group_by_phrase(group_id,phrase):
+def search_group_by_phrase(phrase):
     phrase = phrase.lower()
-    group = Group.query.filter_by(group_id=group_id).first()
-    if group == None:
+    groups = Group.query.all()
+    valid = []
+    for group in groups:
+        if phrase in group.name.lower() or phrase in group.description.lower():
+            valid.append(group.to_dict())
+    if not valid:
         return jsonify({"message":"No such group"}), 404
+    return jsonify(valid), 200
     
-    if not check_group_permission(get_jwt_identity(), group_id):
-        return jsonify({"message":"No permission"}), 403
-    
-    if phrase in group.name.lower() or phrase in group.description.lower():
-        return jsonify(group.to_dict()), 200
-    return jsonify({"message":"No such group"}), 404
