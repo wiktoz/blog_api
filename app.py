@@ -1,6 +1,5 @@
 from flask import Flask, jsonify
-from src.main.extensions import db, jwt, argon2, jwt_redis_blocklist, ACCESS_EXPIRES
-from src.main.db.models import User
+from src.main.extensions import db, jwt, argon2, ACCESS_EXPIRES
 from src.main.controller.AuthController import auth_bp
 from src.main.controller.UserController import user_bp
 from src.main.controller.GroupController import group_bp

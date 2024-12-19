@@ -36,7 +36,9 @@ def delete_post(post_uuid):
     post = Post.query.filter_by(post_id=post_uuid).first()
     if post != None:
         if not check_group_permission(get_jwt_identity(), post.group_id):
-            return jsonify({"message":"No permission"}), 403
+            return jsonify({"message":"No permission. Invalid group"}), 403
+        if str(post.user_id) != str(get_jwt_identity()):
+            return jsonify({"message":"No permission. You are not the author!"}), 403
         comments = Comment.query.filter_by(post_id=post_uuid).all()
         if comments != None:
             for comment in comments:
