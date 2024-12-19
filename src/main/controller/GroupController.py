@@ -1,5 +1,5 @@
 from flask import request, jsonify, Blueprint
-from src.main.db.models import Group, User, Post, Photo
+from src.main.db.models import Group, User, Post, Photo, Notification
 from src.main.extensions import db
 from src.main.utils.body_validator import check_data
 from src.main.utils.authorization import check_group_permission
@@ -62,7 +62,8 @@ def add_post(group_id):
     if not response:
         return jsonify({"message":"Missing data"}), 400
     
-    if not Group.query.filter_by(group_id=group_id).first():
+    group = Group.query.filter_by(group_id=group_id).first()
+    if not group:
         return jsonify({"message":"No such group"}), 404
     user_id = get_jwt_identity()
     if not check_group_permission(user_id, group_id):
@@ -75,6 +76,13 @@ def add_post(group_id):
         photo = Photo(base64=b64_photos, post_id = post.post_id)
         db.session.add(photo)
         db.session.commit()
+    # notify all users in group
+    users = group.users
+    for user in users:
+        if user.user_id != user_id:
+            notification = Notification(user_id=user.user_id, message=f"New post in group {group.name}!")
+            db.session.add(notification)
+            db.session.commit()
     
     return jsonify({"message":"Post added"}), 200
 
