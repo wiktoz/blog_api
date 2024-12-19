@@ -38,9 +38,11 @@ def get_user(user_uuid):
 def put_user():
     data = request.get_json()
     identity = get_jwt_identity()
-    name = data["name"]
-    surname = data["surname"]
     user = User.query.filter_by(user_id=identity).first()
-    user.set_name(name)
-    user.set_surname(surname)
+    name = data["name"]
+    if name:
+        user.set_name(name)
+    surname = data["surname"]
+    if surname:
+        user.set_surname(surname)
     return jsonify(user.to_dict()), 200
