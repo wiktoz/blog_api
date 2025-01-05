@@ -14,6 +14,18 @@ def get_all_groups():
     groups_list = [group.to_dict() for group in groups]
     return jsonify(groups_list), 200
 
+
+@group_bp.route("/my", methods=["GET"])
+@jwt_required()
+def get_user_groups():
+    user_id = get_jwt_identity()
+    user = User.query.filter_by(user_id=user_id).first()
+    if user is None:
+        return jsonify({"message": "No such user"}), 404
+    user_groups = Group.query.join(Group.users).filter(User.user_id == user_id).all()
+    groups_list = [group.to_dict() for group in user_groups]
+    return jsonify(groups_list), 200
+
 @group_bp.route("/<group_id>", methods=["GET"])
 @jwt_required()
 def get_group(group_id):
