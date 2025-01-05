@@ -1,6 +1,8 @@
 from src.main.db.models import db, User, Group, Post, Comment, Rating, Notification
 from sqlalchemy import text
 from datetime import datetime
+import random
+import string
 
 
 class DatabaseInitializer:
@@ -12,54 +14,105 @@ class DatabaseInitializer:
             return
 
         try:
-            # Dodanie przykładowych użytkowników
-            user1 = User(name='John', surname='Doe', email='john.doe@example.com')
-            user1.set_password('password123')
+            # Dodanie dużej ilości przykładowych danych
+            users = []
+            groups = []
+            posts = []
+            comments = []
+            ratings = []
+            notifications = []
 
-            user2 = User(name='Jane', surname='Smith', email='jane.smith@example.com')
-            user2.set_password('securepassword456')
+            # Generowanie użytkowników
+            email_domains = ["test.com", "test.pl"]
+            for i in range(1, 101):  # 100 użytkowników
+                email = f"user{i}@{email_domains[i % 2]}"  # Unikalne adresy email
+                user = User(name=f'User{i}', surname=f'Surname{i}', email=email)
+                user.set_password('password123')
+                users.append(user)
 
-            # Dodanie przykładowych grup
-            group1 = Group(name='Home Chefs', description='Group for people who love cooking at home')
-            group2 = Group(name='Baking Enthusiasts', description='Group for baking lovers and pastry enthusiasts')
+            # Dodanie użytkowników do sesji
+            db.session.add_all(users)
+
+            # Generowanie grup
+            for i in range(1, 21):  # 20 grup
+                group = Group(name=f'Group{i}', description=f'This is the description for Group{i}')
+                groups.append(group)
+
+            # Dodanie grup do sesji
+            db.session.add_all(groups)
 
             # Powiązanie użytkowników z grupami
-            user1.groups.append(group1)
-            user1.groups.append(group2)
-            user2.groups.append(group1)
+            for user in users:
+                for _ in range(random.randint(1, 5)):  # Każdy użytkownik jest w 1-5 grupach
+                    group = random.choice(groups)
+                    if group not in user.groups:
+                        user.groups.append(group)
 
-            # Dodanie przykładowych postów
-            post1 = Post(title='Welcome to Home Chefs', content='This is a welcome post for all home chefs!',
-                         user=user1, group=group1, created_at=datetime.utcnow())
-            post2 = Post(title='Baking Tips and Tricks',
-                         content='Let’s talk about some awesome baking tips and tricks!', user=user2, group=group2,
-                         created_at=datetime.utcnow())
+            # Generowanie postów
+            for user in users:
+                for _ in range(random.randint(1, 10)):  # Każdy użytkownik dodaje 1-10 postów
+                    group = random.choice(user.groups)
+                    post = Post(
+                        title=f'Post by {user.name}',
+                        content=f'This is a post by {user.name} in group {group.name}',
+                        user=user,
+                        group=group,
+                        created_at=datetime.utcnow()
+                    )
+                    posts.append(post)
 
-            # Dodanie przykładowych komentarzy
-            comment1 = Comment(post=post1, user=user2, content='Thanks for the warm welcome! I love cooking at home!',
-                               created_at=datetime.utcnow())
-            comment2 = Comment(post=post2, user=user1,
-                               content='Great tips! I especially love the one about using cold butter for flaky pastries!',
-                               created_at=datetime.utcnow())
+            # Dodanie postów do sesji
+            db.session.add_all(posts)
 
-            # Dodanie przykładowych ocen
-            rating1 = Rating(post=post1, user=user2, rating=5, created_at=datetime.utcnow())
-            rating2 = Rating(post=post2, user=user1, rating=4, created_at=datetime.utcnow())
+            # Generowanie komentarzy
+            for post in posts:
+                for _ in range(random.randint(0, 5)):  # Każdy post ma 0-5 komentarzy
+                    user = random.choice(users)
+                    comment = Comment(
+                        post=post,
+                        user=user,
+                        content=f'This is a comment by {user.name} on post {post.title}',
+                        created_at=datetime.utcnow()
+                    )
+                    comments.append(comment)
 
-            # Dodanie przykładowych powiadomień
-            notification1 = Notification(user=user1, post=post1, content='New comment on your post about home cooking',
-                                         viewed=False, created_at=datetime.utcnow())
-            notification2 = Notification(user=user2, post=post2, content='Your post was rated 4 stars', viewed=False,
-                                         created_at=datetime.utcnow())
+            # Dodanie komentarzy do sesji
+            db.session.add_all(comments)
 
-            # Dodanie wszystkich obiektów do sesji
-            db.session.add_all(
-                [user1, user2, group1, group2, post1, post2, comment1, comment2, rating1, rating2, notification1,
-                 notification2])
+            # Generowanie ocen
+            for post in posts:
+                for _ in range(random.randint(1, 10)):  # Każdy post ma 1-10 ocen
+                    user = random.choice(users)
+                    rating = Rating(
+                        post=post,
+                        user=user,
+                        rating=random.randint(1, 5),  # Ocena w zakresie 1-5
+                        created_at=datetime.utcnow()
+                    )
+                    ratings.append(rating)
+
+            # Dodanie ocen do sesji
+            db.session.add_all(ratings)
+
+            # Generowanie powiadomień
+            for user in users:
+                for _ in range(random.randint(1, 5)):  # Każdy użytkownik dostaje 1-5 powiadomień
+                    post = random.choice(posts)
+                    notification = Notification(
+                        user=user,
+                        post=post,
+                        content=f'You have a new notification about the post "{post.title}"',
+                        viewed=random.choice([True, False]),
+                        created_at=datetime.utcnow()
+                    )
+                    notifications.append(notification)
+
+            # Dodanie powiadomień do sesji
+            db.session.add_all(notifications)
 
             # Zatwierdzenie zmian w bazie danych
             db.session.commit()
-            print("Database has been initialized with sample data.")
+            print("Database has been initialized with a large set of data.")
         except Exception as e:
             db.session.rollback()
             print(f"An error occurred while initializing the database: {e}")
@@ -84,3 +137,4 @@ class DatabaseInitializer:
         except Exception as e:
             db.session.rollback()
             print(f"An error occurred while clearing the database: {e}")
+
