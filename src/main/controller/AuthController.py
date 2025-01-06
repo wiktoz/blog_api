@@ -7,6 +7,7 @@ from flask_jwt_extended import (
     get_jwt_identity, set_access_cookies, set_refresh_cookies, 
     unset_jwt_cookies, get_jwt
 )
+import time
 
 auth_bp = Blueprint("auth_bp", __name__, url_prefix="/api/auth")
 
@@ -85,7 +86,8 @@ def is_revoked(jwt_header, jwt_payload: dict):
 def revoke_access_token():
     token = get_jwt()
     jti = token["jti"]
-    jwt_redis_blocklist.set(jti, "", ex=ACCESS_EXPIRES)
+    time_left = token["exp"] - int(time.time())
+    jwt_redis_blocklist.set(jti, "", ex=time_left)
     out = jsonify({"logout":True})
     return out, 200
 
@@ -94,7 +96,8 @@ def revoke_access_token():
 def revoke_refresh_token():
     token = get_jwt()
     jti = token["jti"]
-    jwt_redis_blocklist.set(jti, "", ex=ACCESS_EXPIRES)
+    time_left = token["exp"] - int(time.time())
+    jwt_redis_blocklist.set(jti, "", ex=time_left)
     out = jsonify({"logout":True})
     return out, 200
 
