@@ -1,5 +1,5 @@
 from flask import jsonify, Blueprint, request
-from src.main.db.models import Post, Rating, Comment, Photo, Notification
+from src.main.db.models import Post, Rating, Comment, Photo, Notification, User
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from src.main.extensions import db
 from src.main.utils.body_validator import check_data
@@ -162,6 +162,42 @@ def get_comments(post_uuid):
     comments_list = [comment.to_dict() for comment in comments]
     return jsonify(comments_list), 200
 
+@post_bp.route('/<post_uuid>/commentsName', methods=['GET'])
+@jwt_required()
+def get_comments_name(post_uuid):
+    comments = Comment.query.filter_by(post_id=post_uuid).all()
+    if not comments:
+        return jsonify({"message": "No comments"}), 404
+
+    # Sprawdzanie, czy post istnieje
+    post = Post.query.filter_by(post_id=post_uuid).first()
+    if not post:
+        return jsonify({"message": "No such post"}), 404
+
+    # Sprawdzanie uprawnień użytkownika
+    if not check_group_permission(get_jwt_identity(), post.group_id):
+        return jsonify({"message": "No permission"}), 403
+
+    # Tworzenie listy komentarzy z dodatkowymi danymi o użytkowniku i ocenach
+    comments_list = []
+    for comment in comments:
+        user = User.query.filter_by(user_id=comment.user_id).first()
+        user_rating = (
+            db.session.query(db.func.avg(Rating.rating))
+            .filter_by(user_id=comment.user_id)
+            .scalar()
+        )
+        if user:
+            comment_data = comment.to_dict()
+            comment_data['username'] = f"{user.name} {user.surname}"
+            comment_data['average_rating'] = round(user_rating, 2) if user_rating else None
+            comments_list.append(comment_data)
+        else:
+            comment_data = comment.to_dict()
+            comment_data['average_rating'] = None
+            comments_list.append(comment_data)
+
+    return jsonify(comments_list), 200
 
 @post_bp.route('/<post_uuid>/comments', methods=['DELETE'])
 @jwt_required()

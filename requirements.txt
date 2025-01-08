@@ -9,5 +9,5 @@ Flask-SQLAlchemy
 psycopg2-binary
 email-validator
 redis
-flask_cors
+flask-cors
 pytest
