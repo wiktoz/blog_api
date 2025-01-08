@@ -169,33 +169,25 @@ def get_comments_name(post_uuid):
     if not comments:
         return jsonify({"message": "No comments"}), 404
 
-    # Sprawdzanie, czy post istnieje
+
     post = Post.query.filter_by(post_id=post_uuid).first()
     if not post:
         return jsonify({"message": "No such post"}), 404
 
-    # Sprawdzanie uprawnień użytkownika
+
     if not check_group_permission(get_jwt_identity(), post.group_id):
         return jsonify({"message": "No permission"}), 403
 
-    # Tworzenie listy komentarzy z dodatkowymi danymi o użytkowniku i ocenach
+
     comments_list = []
     for comment in comments:
         user = User.query.filter_by(user_id=comment.user_id).first()
-        user_rating = (
-            db.session.query(db.func.avg(Rating.rating))
-            .filter_by(user_id=comment.user_id)
-            .scalar()
-        )
         if user:
             comment_data = comment.to_dict()
-            comment_data['username'] = f"{user.name} {user.surname}"
-            comment_data['average_rating'] = round(user_rating, 2) if user_rating else None
+            comment_data['username'] = f"{user.name}"
             comments_list.append(comment_data)
         else:
-            comment_data = comment.to_dict()
-            comment_data['average_rating'] = None
-            comments_list.append(comment_data)
+            comments_list.append(comment.to_dict())
 
     return jsonify(comments_list), 200
 
