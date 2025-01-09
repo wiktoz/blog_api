@@ -85,9 +85,10 @@ def add_post(group_id):
     db.session.commit()
     b64_photos = data.get('photos')
     if b64_photos:
-        photo = Photo(base64=b64_photos, post_id = post.post_id)
-        db.session.add(photo)
-        db.session.commit()
+        for b64_photo in b64_photos:
+            photo = Photo(base64=b64_photo, post_id = post.post_id)
+            db.session.add(photo)
+            db.session.commit()
     # notify all users in group
     users = group.users
     for user in users:
