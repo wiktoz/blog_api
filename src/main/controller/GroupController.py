@@ -93,8 +93,9 @@ def add_post(group_id):
     users = group.users
     for user in users:
         if user.user_id != user_id:
-            notification = Notification(user_id=user.user_id, content=f"New post in group {group.name}")
+            notification = Notification(user_id=user.user_id, content=f"New post in group {group.name}", post_id=post.post_id)
             db.session.add(notification)
+            db.session.commit()
     
     return jsonify({"message":"Post added"}), 200
 
