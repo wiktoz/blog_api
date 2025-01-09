@@ -98,7 +98,7 @@ class Post(db.Model):
             'content': self.content,
             'created_at': self.created_at,
             'updated_at': self.updated_at,
-            'photos': [photo.photo_id for photo in self.photos],
+            'photos': [photo.base64 for photo in self.photos],
             'comments': [comment.comment_id for comment in self.comments],
             'ratings': [rating.rating_id for rating in self.ratings],
             'notifications': [notification.notification_id for notification in self.notifications]
