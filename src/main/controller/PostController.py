@@ -149,8 +149,9 @@ def comment_post(post_uuid):
     group_users = post.group.users
     for user in group_users:
         if user.user_id != user_id:
-            notification = Notification(user_id=user.user_id, post_id=post_uuid, comment_id=comment.comment_id)
+            notification = Notification(user_id=user.user_id, content=f"Someone commented on post {post.title}")
             db.session.add(notification)
+            db.session.commit()
     return jsonify({"message":"Comment added"}), 200
 
 @post_bp.route('/<post_uuid>/comments', methods=['GET'])
