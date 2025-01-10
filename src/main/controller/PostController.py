@@ -70,8 +70,8 @@ def calculate_average_rating(post_uuid):
     if not check_group_permission(get_jwt_identity(), post.group_id):
         return jsonify({"message":"No permission"}), 403
     ratings = Rating.query.filter_by(post_id=post_uuid).all()
-    if ratings == None:
-        return jsonify({"message":"No ratings"}), 404
+    if not ratings:
+        return jsonify({"message": "No ratings"}), 404
     total = 0
     for rating in ratings:
         total += rating.rating
