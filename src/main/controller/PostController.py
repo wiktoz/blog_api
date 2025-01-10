@@ -4,6 +4,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from src.main.extensions import db
 from src.main.utils.body_validator import check_data
 from src.main.utils.authorization import check_group_permission
+from flask import current_app
 
 post_bp = Blueprint('post_bp', __name__, url_prefix='/api/posts')
 
@@ -133,31 +134,46 @@ def delete_rating(post_uuid):
 def comment_post(post_uuid):
     post = Post.query.filter_by(post_id=post_uuid).first()
     user_id = get_jwt_identity()
-    if post == None:
-        return jsonify({"message":"No such post"}), 404
+    if post is None:
+        return jsonify({"message": "No such post"}), 404
     if not check_group_permission(user_id, post.group_id):
-        return jsonify({"message":"No permission to comment on this post"}), 403
+        return jsonify({"message": "No permission to comment on this post"}), 403
+
     data = request.get_json()
     required_data = ['content']
     response = check_data(data, required_data)
     if not response:
-        return jsonify({"message":"Missing data"}), 400
+        return jsonify({"message": "Missing data"}), 400
+
     content = data.get("content")
+
+    # Logowanie treści komentarza w logach serwera HTTP
+    current_app.logger.info(f"New comment received: post_id={post_uuid}, user_id={user_id}, content='{content}'")
+
     comment = Comment(content=content, post_id=post_uuid, user_id=user_id)
 
     notification = Notification(user_id=post.user_id, content=f"Someone commented on your post {post.title}", post_id=post_uuid)
     db.session.add(notification)
     db.session.commit()
+
     comments = Comment.query.filter_by(post_id=post_uuid).all()
-    if comments != None:
-        for comment in comments:
-            if comment.user_id != user_id:
-                notification = Notification(user_id=comment.user_id, content=f"Someone commented on post {post.title}", post_id=post_uuid)
+    if comments is not None:
+        for existing_comment in comments:
+            if existing_comment.user_id != user_id:
+                notification = Notification(
+                    user_id=existing_comment.user_id,
+                    content=f"Someone commented on post {post.title}",
+                    post_id=post_uuid
+                )
                 db.session.add(notification)
-                db.session.commit()
+        db.session.commit()
+
+    # Tu dodajemy właściwy komentarz
     db.session.add(comment)
     db.session.commit()
-    return jsonify({"message":"Comment added"}), 200
+
+
+    return jsonify({"message": "Comment added"}), 200
 
 @post_bp.route('/<post_uuid>/comments', methods=['GET'])
 @jwt_required()
