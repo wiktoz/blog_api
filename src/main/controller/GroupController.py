@@ -8,6 +8,7 @@ from flask_jwt_extended import (jwt_required,  get_jwt_identity)
 group_bp = Blueprint("group_bp", __name__, url_prefix="/api/groups")
 
 @group_bp.route("/", methods=["GET"])
+@group_bp.route("/list", methods=["GET"])
 @jwt_required()
 def get_all_groups():
     groups = Group.query.all()
