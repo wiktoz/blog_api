@@ -42,11 +42,11 @@ def test_invalid_get_group(client):
 def test_join_group(client):
     auth = client.post('/api/auth/login', json={
         "email": "jane.smith@example.com",
-        "password": "securepassword456"
+        "password": "password123"
     })
 
     atoken = auth.headers.getlist('Set-Cookie')[0].split(";")[0].split("=")[1]
-    group_id = Group.query.filter_by(name="Baking Enthusiasts").first().group_id
+    group_id = Group.query.filter_by(name="Culinary Enthusiasts").first().group_id
     response = client.get(f'/api/groups/{group_id}/join', headers={
             "Authorization": f"Bearer {atoken}"
         }
@@ -61,7 +61,7 @@ def test_invalid_join_group(client):
     })
 
     atoken = auth.headers.getlist('Set-Cookie')[0].split(";")[0].split("=")[1]
-    group_id = Group.query.filter_by(name="Baking Enthusiasts").first().group_id
+    group_id = Group.query.filter_by(name="Home Chefs").first().group_id
     response = client.get(f'/api/groups/{group_id}/join', headers={
             "Authorization": f"Bearer {atoken}"
         }
@@ -85,10 +85,10 @@ def test_get_posts(client):
 def test_invalid_get_posts(client):
     auth = client.post('/api/auth/login', json={
         "email": "jane.smith@example.com",
-        "password": "securepassword456"
+        "password": "password123"
     })
     atoken = auth.headers.getlist('Set-Cookie')[0].split(";")[0].split("=")[1]
-    group_id = Group.query.filter_by(name="Baking Enthusiasts").first().group_id
+    group_id = Group.query.filter_by(name="Culinary Enthusiasts").first().group_id
     response = client.get(f'/api/groups/{group_id}/posts', headers={
             "Authorization": f"Bearer {atoken}"
         }

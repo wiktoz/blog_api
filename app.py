@@ -8,6 +8,7 @@ from src.main.controller.NotificationController import notification_bp
 from src.main.db.DatabaseInitializer import DatabaseInitializer
 from flask_cors import CORS
 
+
 def register_extensions(app):
     db.init_app(app)
     jwt.init_app(app)
@@ -35,7 +36,6 @@ def create_app():
     app.register_blueprint(post_bp)
     app.register_blueprint(notification_bp)
     register_extensions(app)
-
    
     with app.app_context():
         db.create_all() 

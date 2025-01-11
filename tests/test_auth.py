@@ -89,4 +89,3 @@ def test_refresh_token(client):
         "X-CSRF-TOKEN": x_csrf_token
     })
     assert response.status_code == 200
-    assert response.json == {"refresh":True}

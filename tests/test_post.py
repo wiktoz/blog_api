@@ -24,11 +24,11 @@ def test_get_post(client):
         "email": "john.doe@example.com",
         "password": "password123"
     })
-    post_id = Post.query.filter_by(title="Baking Tips and Tricks").first().post_id
+    post_id = Post.query.filter_by(title="Welcome to Home Chefs").first().post_id
     atoken = auth.headers.getlist('Set-Cookie')[0].split(";")[0].split("=")[1]
     response = client.get(f'/api/posts/{post_id}', headers={"Authorization": f"Bearer {atoken}"})
     assert response.status_code == 200
-    assert response.json["title"] == "Baking Tips and Tricks"
+    assert response.json["title"] == "Welcome to Home Chefs"
 
 def test_delete_post(client):
     auth = client.post('/api/auth/login', json={
@@ -44,10 +44,10 @@ def test_delete_post(client):
 
 def test_invalid_delete_post(client):
     auth = client.post('/api/auth/login', json={
-        "email": "john.doe@example.com",
+        "email": "jane.smith@example.com",
         "password": "password123"
     })
-    post_id = Post.query.filter_by(title="Baking Tips and Tricks").first().post_id
+    post_id = Post.query.filter_by(title="Welcome to Home Chefs").first().post_id
     atoken = auth.headers.getlist('Set-Cookie')[0].split(";")[0].split("=")[1]
     x_csrf_token = auth.headers.getlist('Set-Cookie')[1].split(";")[0].split("=")[1]
     response = client.delete(f'/api/posts/{post_id}', headers={"Authorization": f"Bearer {atoken}", "X-CSRF-TOKEN": x_csrf_token})
@@ -60,11 +60,11 @@ def test_avarage_rating(client):
         "email": "john.doe@example.com",
         "password": "password123"
     })
-    post_id = Post.query.filter_by(title="Baking Tips and Tricks").first().post_id
+    post_id = Post.query.filter_by(title="Welcome to Home Chefs").first().post_id
     atoken = auth.headers.getlist('Set-Cookie')[0].split(";")[0].split("=")[1]
     response = client.get(f'/api/posts/{post_id}/rate', headers={"Authorization": f"Bearer {atoken}"})
     assert response.status_code == 200
-    assert response.json["average"] == 4.0
+    assert response.json["average"] == 5.0
 
 def test_rate_post(client):
     auth = client.post('/api/auth/login', json={
@@ -88,7 +88,7 @@ def test_get_comments(client):
         "email": "john.doe@example.com",
         "password": "password123"
     })
-    post_id = Post.query.filter_by(title="Baking Tips and Tricks").first().post_id
+    post_id = Post.query.filter_by(title="Welcome to Home Chefs").first().post_id
     atoken = auth.headers.getlist('Set-Cookie')[0].split(";")[0].split("=")[1]
     response = client.get(f'/api/posts/{post_id}/comments', headers={"Authorization": f"Bearer {atoken}"})
     assert response.status_code == 200

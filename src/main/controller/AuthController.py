@@ -58,6 +58,45 @@ def register():
     
 @auth_bp.route("/login", methods=["POST"])
 def login():
+    """
+    ---
+    post:
+      summary: User login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        200:
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  login:
+                    type: boolean
+                  message:
+                    type: string
+        401:
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  login:
+                    type: boolean
+                  message:
+                    type: string
+    """
     data = request.get_json()
     email, password = data["email"], data["password"]
     if not email:
@@ -76,6 +115,29 @@ def login():
 
 @jwt.token_in_blocklist_loader
 def is_revoked(jwt_header, jwt_payload: dict):
+    """
+    Check if the token is revoked.
+    ---
+    parameters:
+      - name: jwt_header
+        in: header
+        type: string
+        required: true
+      - name: jwt_payload
+        in: body
+        schema:
+          type: object
+          properties:
+            jti:
+              type: string
+    responses:
+      200:
+        description: Token status
+        content:
+          application/json:
+            schema:
+              type: boolean
+    """
     jti = jwt_payload["jti"]
     token_in_redis = jwt_redis_blocklist.get(jti)
     return token_in_redis is not None
@@ -84,6 +146,22 @@ def is_revoked(jwt_header, jwt_payload: dict):
 @auth_bp.route("/token/revoke/atoken", methods=["POST"])
 @jwt_required()
 def revoke_access_token():
+    """
+    Revoke access token.
+    ---
+    post:
+      summary: Revoke access token
+      responses:
+        200:
+          description: Successful revocation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  logout:
+                    type: boolean
+    """
     token = get_jwt()
     jti = token["jti"]
     time_left = token["exp"] - int(time.time())
@@ -94,6 +172,22 @@ def revoke_access_token():
 @auth_bp.route("/token/revoke/rtoken", methods=["POST"])
 @jwt_required(refresh=True)
 def revoke_refresh_token():
+    """
+    Revoke refresh token.
+    ---
+    post:
+      summary: Revoke refresh token
+      responses:
+        200:
+          description: Successful revocation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  logout:
+                    type: boolean
+    """
     token = get_jwt()
     jti = token["jti"]
     time_left = token["exp"] - int(time.time())
@@ -105,8 +199,24 @@ def revoke_refresh_token():
 @auth_bp.route("/token/refresh", methods=["POST"])
 @jwt_required(refresh=True)
 def refresh_token():
-    out = jsonify({"refresh":True})
+    """
+    Refresh access token.
+    ---
+    post:
+      summary: Refresh access token
+      responses:
+        200:
+          description: Successful token refresh
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+    """
     current_user = get_jwt_identity()
-    atoken = create_access_token(identity=current_user)
-    set_access_cookies(out, atoken)
-    return jsonify({"refresh":True}), 200
+    access_token = create_access_token(identity=current_user)
+    out = jsonify({'access_token': access_token})
+    set_access_cookies(out, access_token)
+    return out, 200

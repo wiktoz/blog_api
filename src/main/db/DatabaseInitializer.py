@@ -27,16 +27,24 @@ class DatabaseInitializer:
             notifications = []
             photos = []
 
+            john_data = {"name": "John", "surname": "Doe", "email": "john.doe@example.com"}
+            john = User(name=john_data["name"], surname=john_data["surname"], email=john_data["email"])
+            john.set_password('password123')
+            jane = User(name="Jane", surname="Smith", email="jane.smith@example.com")
+            jane.set_password('password123')
+            db.session.add(john)
+            db.session.add(jane)
+            db.session.commit()
+
+
             # Generowanie użytkowników
             user_data = [
-                {"name": "John", "surname": "Doe", "email": "john.doe@example.com"},
-                {"name": "Jane", "surname": "Smith", "email": "jane.smith@example.com"},
                 {"name": "Alice", "surname": "Johnson", "email": "alice.johnson@example.com"},
                 {"name": "Bob", "surname": "Brown", "email": "bob.brown@example.com"},
                 {"name": "Charlie", "surname": "Davis", "email": "charlie.davis@example.com"},
                 {"name": "Diana", "surname": "Miller", "email": "diana.miller@example.com"},
                 {"name": "Eve", "surname": "Wilson", "email": "eve.wilson@example.com"},
-                {"name": "Frank", "surname": "Moore", "email": "frank.moore@example.com"}
+                {"name": "Frank", "surname": "Moore", "email": "frank.moore@example.com"},
             ]
             for data in user_data:
                 user = User(name=data["name"], surname=data["surname"], email=data["email"])
@@ -46,14 +54,51 @@ class DatabaseInitializer:
             # Dodanie użytkowników do sesji
             db.session.add_all(users)
 
-            # Generowanie grup
+
+            home_chefs = Group(name="Home Chefs", description="A group for people who love to cook at home.")
+            baking_enthusiasts = Group(name="Baking Enthusiasts", description="A group for those who love to bake.")
+            db.session.add(home_chefs)
+            db.session.add(baking_enthusiasts)
+            db.session.commit()
+            john.groups.append(home_chefs)
+            jane.groups.append(baking_enthusiasts)
+            jane.groups.append(home_chefs)
+            db.session.commit()
+
+            post1 = Post(title='Welcome to Home Chefs', content='This is a welcome post for all home chefs!',
+                         user=john, group=home_chefs, created_at=datetime.utcnow())
+            post2 = Post(title='Baking Tips and Tricks',
+                         content='Let’s talk about some awesome baking tips and tricks!', user=users[2], group=baking_enthusiasts,
+                         created_at=datetime.utcnow())
+            # Dodanie przykładowych komentarzy
+            comment1 = Comment(post=post1, user=john, content='Thanks for the warm welcome! I love cooking at home!',
+                               created_at=datetime.utcnow())
+            comment2 = Comment(post=post2, user=john,
+                               content='Great tips! I especially love the one about using cold butter for flaky pastries!',
+                               created_at=datetime.utcnow())
+            # Dodanie przykładowych ocen
+            rating1 = Rating(post=post1, user=john, rating=5, created_at=datetime.utcnow())
+            rating2 = Rating(post=post2, user=jane, rating=4, created_at=datetime.utcnow())
+            # Dodanie przykładowych powiadomień
+            notification1 = Notification(user=john, post=post1, content='New comment on your post about home cooking',
+                                         viewed=False, created_at=datetime.utcnow())
+            notification2 = Notification(user=jane, post=post2, content='Your post was rated 4 stars', viewed=False,
+                                         created_at=datetime.utcnow())
+            # Dodanie wszystkich obiektów do sesji
+            db.session.add_all(
+                [post1, post2, comment1, comment2, rating1, rating2, notification1,
+                 notification2])
+            # Zatwierdzenie zmian w bazie danych
+            db.session.commit()
+
+
             group_data = [
                 {"name": "Culinary Enthusiasts", "description": "A group for those who love to cook and share recipes."},
                 {"name": "Healthy Eaters", "description": "A group focused on healthy eating and nutritious recipes."},
                 {"name": "Baking Lovers", "description": "A group for people who enjoy baking and sharing their baked goods."},
                 {"name": "Food Critics", "description": "A group for those who love to review and critique different foods."}
             ]
-
+            
             for data in group_data:
                 group = Group(name=data["name"], description=data["description"])
                 groups.append(group)

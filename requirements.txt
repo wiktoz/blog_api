@@ -11,3 +11,4 @@ email-validator
 redis
 flask-cors
 pytest
+flask-swag
