@@ -26,7 +26,7 @@ def read_notification():
     notification = Notification.query.filter_by(notification_id=notification_id).first()
     if notification == None:
         return jsonify({"message":"No such notification"}), 404
-    if notification.user_id != identity:
+    if str(notification.user_id) != str(identity):
         return jsonify({"message":"No permission"}), 403
     notification.viewed = viewed
     db.session.commit()
