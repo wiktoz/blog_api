@@ -1,4 +1,8 @@
 services:
+    blog_webapp:
+        build: ../blog_webapp/
+        ports:
+            - 3000:3000
     blog_api:
         build: .
         ports:

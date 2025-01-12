@@ -1,4 +1,4 @@
-from flask import request, Response, jsonify, Blueprint
+from flask import request, Response, jsonify, Blueprint, make_response
 from src.main.db.models import User
 from src.main.extensions import db, jwt, jwt_redis_blocklist, ACCESS_EXPIRES
 from src.main.utils.password_validator import is_valid_length, is_on_blacklist, contains_pii
@@ -167,7 +167,11 @@ def revoke_access_token():
     time_left = token["exp"] - int(time.time())
     jwt_redis_blocklist.set(jti, "", ex=time_left)
     out = jsonify({"logout":True})
-    return out, 200
+
+    response = make_response(out)
+    for cookie in request.cookies:
+        response.delete_cookie(cookie)
+    return response, 200
 
 @auth_bp.route("/token/revoke/rtoken", methods=["POST"])
 @jwt_required(refresh=True)
